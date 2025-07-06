@@ -29,5 +29,13 @@ export default withNuxt(antfu({
       case: "kebabCase",
       ignore: ["README.md"],
     }],
+    "vue/max-attributes-per-line": ["error", {
+      singleline: {
+        max: 2,
+      },
+      multiline: {
+        max: 1,
+      },
+    }],
   },
 }));
