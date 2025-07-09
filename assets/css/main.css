@@ -11,3 +11,7 @@
   --radius-field: 0.25rem;
   --radius-box: 0.5rem;
 }
+
+* {
+  font-family: "Inter", sans-serif;
+}

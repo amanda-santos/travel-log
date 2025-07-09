@@ -10,7 +10,7 @@ const props = defineProps<{
 
 <template>
   <fieldset class="fieldset">
-    <legend class="fieldset-legend">
+    <legend class="fieldset-legend text-sm font-medium">
       {{ props.label }}
     </legend>
     <Field
@@ -18,7 +18,7 @@ const props = defineProps<{
       :name="props.name"
       :type="type || 'text'"
       :disabled="disabled"
-      class="w-full"
+      class="w-full text-sm"
       :class="{
         'input-error': props.error,
         'input': !type || type === 'text',
