@@ -10,6 +10,8 @@ export default defineNuxtConfig({
     "@nuxt/icon",
     "@nuxtjs/color-mode",
     "@pinia/nuxt",
+    "@vee-validate/nuxt",
+    "@nuxt/fonts",
   ],
   css: ["~/assets/css/main.css"],
   vite: { plugins: [tailwindcss()] },
@@ -20,5 +22,13 @@ export default defineNuxtConfig({
   },
   colorMode: {
     dataValue: "theme",
+  },
+  fonts: {
+    families: [
+      {
+        name: "Inter",
+        provider: "google",
+      },
+    ],
   },
 });

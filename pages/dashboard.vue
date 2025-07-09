@@ -2,6 +2,10 @@
 const isSidebarOpen = ref(true);
 
 onMounted(() => {
+  if (!localStorage.getItem("travel-log:is-sidebar-open")) {
+    localStorage.setItem("travel-log:is-sidebar-open", "true");
+  }
+
   isSidebarOpen.value = localStorage.getItem("travel-log:is-sidebar-open") === "true";
 });
 
@@ -21,6 +25,11 @@ function toggleSidebar() {
       <div
         class="flex hover:cursor-pointer hover:bg-base-200 p-2"
         :class="{ 'justify-center': !isSidebarOpen, 'justify-end': isSidebarOpen }"
+        role="button"
+        :aria-label="isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'"
+        tabindex="0"
+        @keydown.enter="toggleSidebar"
+        @keydown.space="toggleSidebar"
         @click="toggleSidebar"
       >
         <Icon
@@ -58,6 +67,8 @@ function toggleSidebar() {
       </div>
     </div>
 
-    <div class="flex-1" />
+    <div class="flex-1">
+      <NuxtPage />
+    </div>
   </div>
 </template>
