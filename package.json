@@ -16,7 +16,7 @@
   "dependencies": {
     "@libsql/client": "^0.15.0",
     "@nuxt/eslint": "1.2.0",
-    "@nuxt/fonts": "0.11.4",
+    "@nuxt/fonts": "^0.11.4",
     "@nuxt/icon": "1.10.3",
     "@nuxtjs/color-mode": "3.5.2",
     "@pinia/nuxt": "0.10.1",
@@ -28,8 +28,10 @@
     "drizzle-orm": "^0.40.1",
     "drizzle-zod": "^0.7.0",
     "eslint": "^9.0.0",
+    "nanoid": "^5.1.5",
     "nuxt": "^3.16.0",
     "pinia": "^3.0.1",
+    "slug": "^10.0.0",
     "tailwindcss": "^4.0.14",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0",
@@ -38,16 +40,12 @@
   "devDependencies": {
     "@antfu/eslint-config": "^4.10.1",
     "@iconify-json/tabler": "^1.2.17",
+    "@types/slug": "^5.0.9",
     "daisyui": "^5.0.6",
     "drizzle-kit": "^0.30.5",
     "eslint-plugin-format": "^1.0.1",
     "husky": "^9.1.7",
     "lint-staged": "^15.5.0"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild"
-    ]
   },
   "lint-staged": {
     "*": "pnpm lint"
