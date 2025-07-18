@@ -1,12 +1,23 @@
 <script lang="ts" setup>
 const isSidebarOpen = ref(true);
+const route = useRoute();
+const sidebarStore = useSidebarStore();
+const locationStore = useLocationStore();
 
-onMounted(() => {
-  if (!localStorage.getItem("travel-log:is-sidebar-open")) {
-    localStorage.setItem("travel-log:is-sidebar-open", "true");
-  }
+const hasSidebarItems = computed(() => {
+  return sidebarStore.sidebarItems.length > 0;
+});
 
-  isSidebarOpen.value = localStorage.getItem("travel-log:is-sidebar-open") === "true";
+const isLoadingSidebarItems = computed(() => {
+  return sidebarStore.isLoading;
+});
+
+const showSidebarItemsDivider = computed(() => {
+  return hasSidebarItems.value || isLoadingSidebarItems.value;
+});
+
+const showSidebarItems = computed(() => {
+  return hasSidebarItems.value && !isLoadingSidebarItems.value;
 });
 
 function toggleSidebar() {
@@ -14,6 +25,18 @@ function toggleSidebar() {
 
   localStorage.setItem("travel-log:is-sidebar-open", isSidebarOpen.value.toString());
 }
+
+onMounted(() => {
+  if (!localStorage.getItem("travel-log:is-sidebar-open")) {
+    localStorage.setItem("travel-log:is-sidebar-open", "true");
+  }
+
+  isSidebarOpen.value = localStorage.getItem("travel-log:is-sidebar-open") === "true";
+
+  if (route.path !== "/dashboard") {
+    locationStore.refresh();
+  }
+});
 </script>
 
 <template>
@@ -57,6 +80,22 @@ function toggleSidebar() {
           icon="tabler:circle-plus-filled"
           href="/dashboard/add"
         />
+
+        <div v-if="showSidebarItemsDivider" class="divider" />
+        <div v-if="isLoadingSidebarItems" class="px-4">
+          <div class="skeleton h-4 w-full" />
+        </div>
+        <div v-if="showSidebarItems" class="flex flex-col">
+          <SidebarButton
+            v-for="item in sidebarStore.sidebarItems"
+            :key="item.id"
+            :show-label="isSidebarOpen"
+            :label="item.label"
+            :icon="item.icon"
+            :href="item.href"
+          />
+        </div>
+
         <div class="divider" />
         <SidebarButton
           :show-label="isSidebarOpen"
