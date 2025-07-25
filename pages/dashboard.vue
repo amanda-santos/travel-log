@@ -3,6 +3,7 @@ const isSidebarOpen = ref(true);
 const route = useRoute();
 const sidebarStore = useSidebarStore();
 const locationStore = useLocationStore();
+const mapStore = useMapStore();
 
 const hasSidebarItems = computed(() => {
   return sidebarStore.sidebarItems.length > 0;
@@ -85,6 +86,9 @@ onMounted(() => {
             :label="item.label"
             :icon="item.icon"
             :href="item.href"
+            :icon-color="mapStore.selectedPoint === item.location ? 'text-accent' : undefined"
+            @mouseenter="mapStore.selectedPoint = item.location ?? null"
+            @mouseleave="mapStore.selectedPoint = null"
           />
         </div>
 
