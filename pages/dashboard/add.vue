@@ -25,20 +25,25 @@ const onSubmit = handleSubmit(async (values) => {
   try {
     submitError.value = "";
     loading.value = true;
+
     await $fetch("/api/locations", {
       method: "post",
       body: values,
     });
+
     submitted.value = true;
     navigateTo("/dashboard");
   }
   catch (e) {
     const error = e as FetchError;
+
     if (error.data?.data) {
       setErrors(error.data?.data);
     }
-    submitError.value = error.statusMessage || "An unknown error occurred.";
+
+    submitError.value = getFetchErrorMessage(error);
   }
+
   loading.value = false;
 });
 
@@ -46,6 +51,19 @@ function formatNumber(value?: number) {
   if (!value)
     return 0;
   return value.toFixed(5);
+}
+
+function searchResultSelected(result: NominatimResult) {
+  setFieldValue("name", result.display_name);
+
+  mapStore.addedPoint = {
+    id: 1,
+    name: "Added Point",
+    description: "",
+    long: Number(result.lon),
+    lat: Number(result.lat),
+    centerMap: true,
+  };
 }
 
 effect(() => {
@@ -90,9 +108,11 @@ onBeforeRouteLeave(() => {
         A location is a place you have traveled or will travel to. It can be a city, country, state or point of interest. You can add specific times you visited this location after adding it.
       </p>
     </div>
+
     <div v-if="submitError" role="alert" class="alert alert-error">
       <span>{{ submitError }}</span>
     </div>
+
     <form class="flex flex-col gap-2" @submit.prevent="onSubmit">
       <AppFormField
         name="name"
@@ -107,15 +127,26 @@ onBeforeRouteLeave(() => {
         :error="errors.description"
         :disabled="loading"
       />
-      <p>
-        Drag the <Icon name="tabler:map-pin-filled" class="text-warning" /> marker to your desired location.
-      </p>
-      <p>
-        Or double click on the map.
-      </p>
+
       <p class="text-xs text-gray-400">
-        Current location: {{ formatNumber(controlledValues.lat) }}, {{ formatNumber(controlledValues.long) }}
+        Current coordinates: {{ formatNumber(controlledValues.lat) }}, {{ formatNumber(controlledValues.long) }}
       </p>
+
+      <p>
+        To set the coordinates:
+      </p>
+      <ul class="list-disc ml-4 text-sm">
+        <li>
+          Drag the <Icon name="tabler:map-pin-filled" class="text-warning" /> marker on the map.
+        </li>
+        <li>
+          Double click the map.
+        </li>
+        <li>
+          Search for a location below.
+        </li>
+      </ul>
+
       <div class="flex justify-end gap-2">
         <button
           :disabled="loading"
@@ -133,5 +164,9 @@ onBeforeRouteLeave(() => {
         </button>
       </div>
     </form>
+
+    <div class="divider" />
+
+    <AppLocationSearch @result-selected="searchResultSelected" />
   </div>
 </template>
