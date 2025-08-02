@@ -1,9 +1,13 @@
 <script lang="ts" setup>
+import { isPointSelected } from "~/utils/map-points";
+
 const isSidebarOpen = ref(true);
 const route = useRoute();
 const sidebarStore = useSidebarStore();
 const locationStore = useLocationStore();
 const mapStore = useMapStore();
+
+const { currentLocation } = storeToRefs(locationStore);
 
 const hasSidebarItems = computed(() => {
   return sidebarStore.sidebarItems.length > 0;
@@ -35,7 +39,61 @@ onMounted(() => {
   isSidebarOpen.value = localStorage.getItem("travel-log:is-sidebar-open") === "true";
 
   if (route.path !== "/dashboard") {
-    locationStore.refresh();
+    locationStore.refreshLocations();
+  }
+});
+
+effect(() => {
+  if (route.name === "dashboard") {
+    sidebarStore.sidebarTopItems = [{
+      id: "link-dashboard",
+      label: "Locations",
+      href: "/dashboard",
+      icon: "tabler:map",
+    }, {
+      id: "link-location-add",
+      label: "Add Location",
+      href: "/dashboard/add",
+      icon: "tabler:circle-plus-filled",
+    }];
+  }
+  else if (route.name === "dashboard-location-slug") {
+    sidebarStore.sidebarTopItems = [{
+      id: "link-dashboard",
+      label: "Back to Locations",
+      href: "/dashboard",
+      icon: "tabler:arrow-left",
+    }, {
+      id: "link-dashboard",
+      label: currentLocation.value ? currentLocation.value.name : "View Logs",
+      to: {
+        name: "dashboard-location-slug",
+        params: {
+          slug: currentLocation.value?.slug,
+        },
+      },
+      icon: "tabler:map",
+    }, {
+      id: "link-location-edit",
+      label: "Edit Location",
+      to: {
+        name: "dashboard-location-slug-edit",
+        params: {
+          slug: currentLocation.value?.slug,
+        },
+      },
+      icon: "tabler:map-pin-cog",
+    }, {
+      id: "link-location-add",
+      label: "Add Location Log",
+      to: {
+        name: "dashboard-location-slug-add",
+        params: {
+          slug: currentLocation.value?.slug,
+        },
+      },
+      icon: "tabler:circle-plus-filled",
+    }];
   }
 });
 </script>
@@ -62,16 +120,13 @@ onMounted(() => {
 
       <div class="flex flex-col">
         <SidebarButton
+          v-for="item in sidebarStore.sidebarTopItems"
+          :key="item.id"
           :show-label="isSidebarOpen"
-          label="Locations"
-          icon="tabler:map"
-          href="/dashboard"
-        />
-        <SidebarButton
-          :show-label="isSidebarOpen"
-          label="Add Location"
-          icon="tabler:circle-plus-filled"
-          href="/dashboard/add"
+          :label="item.label"
+          :icon="item.icon"
+          :href="item.href"
+          :to="item.to"
         />
 
         <div v-if="showSidebarItemsDivider" class="divider" />
@@ -86,8 +141,8 @@ onMounted(() => {
             :label="item.label"
             :icon="item.icon"
             :to="item.to"
-            :icon-color="mapStore.selectedPoint === item.location ? 'text-accent' : undefined"
-            @mouseenter="mapStore.selectedPoint = item.location ?? null"
+            :icon-color="isPointSelected(item.mapPoint, mapStore.selectedPoint) ? 'text-accent' : undefined"
+            @mouseenter="mapStore.selectedPoint = item.mapPoint ?? null"
             @mouseleave="mapStore.selectedPoint = null"
           />
         </div>
