@@ -8,15 +8,17 @@ export type SidebarItem = {
   icon: string;
   href?: string;
   to?: RouteLocationRaw;
-  location?: MapPoint | null;
+  mapPoint?: MapPoint | null;
 };
 
 export const useSidebarStore = defineStore("useSidebarStore", () => {
   const sidebarItems = ref<SidebarItem[]>([]);
+  const sidebarTopItems = ref<SidebarItem[]>([]);
   const isLoading = ref(false);
 
   return {
     isLoading,
     sidebarItems,
+    sidebarTopItems,
   };
 });
