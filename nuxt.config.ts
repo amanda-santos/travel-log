@@ -13,6 +13,7 @@ export default defineNuxtConfig({
     "@vee-validate/nuxt",
     "@nuxt/fonts",
     "nuxt-maplibre",
+    "nuxt-csurf",
   ],
   css: ["~/assets/css/main.css"],
   vite: {
