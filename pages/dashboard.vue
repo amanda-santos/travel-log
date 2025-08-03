@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { CURRENT_LOCATION_PAGES, EDIT_PAGES, LOCATION_PAGES } from "~/lib/constants";
 import { isPointSelected } from "~/utils/map-points";
 
 const isSidebarOpen = ref(true);
@@ -7,7 +8,15 @@ const sidebarStore = useSidebarStore();
 const locationStore = useLocationStore();
 const mapStore = useMapStore();
 
-const { currentLocation } = storeToRefs(locationStore);
+const { currentLocation, currentLocationStatus } = storeToRefs(locationStore);
+
+const isInLocationPage = computed(() => LOCATION_PAGES.has(route.name?.toString() || ""));
+
+const isInCurrentLocationPage = computed(() => CURRENT_LOCATION_PAGES.has(route.name?.toString() || ""));
+
+const isInEditPage = computed(() => EDIT_PAGES.has(route.name?.toString() || ""));
+
+const isLoadingCurrentLocation = computed(() => currentLocationStatus.value === "pending" || !currentLocation.value);
 
 const hasSidebarItems = computed(() => {
   return sidebarStore.sidebarItems.length > 0;
@@ -31,20 +40,24 @@ function toggleSidebar() {
   localStorage.setItem("travel-log:is-sidebar-open", isSidebarOpen.value.toString());
 }
 
+if (isInLocationPage.value) {
+  await locationStore.refreshLocations();
+}
+
+if (isInCurrentLocationPage.value) {
+  await locationStore.refreshCurrentLocation();
+}
+
 onMounted(() => {
   if (!localStorage.getItem("travel-log:is-sidebar-open")) {
     localStorage.setItem("travel-log:is-sidebar-open", "true");
   }
 
   isSidebarOpen.value = localStorage.getItem("travel-log:is-sidebar-open") === "true";
-
-  if (route.path !== "/dashboard") {
-    locationStore.refreshLocations();
-  }
 });
 
 effect(() => {
-  if (route.name === "dashboard") {
+  if (isInLocationPage.value) {
     sidebarStore.sidebarTopItems = [{
       id: "link-dashboard",
       label: "Locations",
@@ -57,7 +70,7 @@ effect(() => {
       icon: "tabler:circle-plus-filled",
     }];
   }
-  else if (route.name === "dashboard-location-slug") {
+  else if (isInCurrentLocationPage.value) {
     sidebarStore.sidebarTopItems = [{
       id: "link-dashboard",
       label: "Back to Locations",
@@ -65,11 +78,11 @@ effect(() => {
       icon: "tabler:arrow-left",
     }, {
       id: "link-dashboard",
-      label: currentLocation.value ? currentLocation.value.name : "View Logs",
+      label: isLoadingCurrentLocation.value ? "Loading..." : currentLocation.value!.name,
       to: {
         name: "dashboard-location-slug",
         params: {
-          slug: currentLocation.value?.slug,
+          slug: route.params.slug,
         },
       },
       icon: "tabler:map",
@@ -79,7 +92,7 @@ effect(() => {
       to: {
         name: "dashboard-location-slug-edit",
         params: {
-          slug: currentLocation.value?.slug,
+          slug: route.params.slug,
         },
       },
       icon: "tabler:map-pin-cog",
@@ -89,7 +102,7 @@ effect(() => {
       to: {
         name: "dashboard-location-slug-add",
         params: {
-          slug: currentLocation.value?.slug,
+          slug: route.params.slug,
         },
       },
       icon: "tabler:circle-plus-filled",
@@ -158,8 +171,17 @@ effect(() => {
     </div>
 
     <div class="flex-1 overflow-auto bg-base-200">
-      <div class="flex size-full" :class="{ 'flex-col': route.path !== '/dashboard/add' }">
-        <NuxtPage />
+      <div
+        class="flex size-full"
+        :class="{
+          'flex-col': !isInEditPage,
+        }"
+      >
+        <NuxtPage
+          :class="{
+            'shrink-0 w-96': isInEditPage,
+          }"
+        />
         <AppMap class="flex-1" />
       </div>
     </div>

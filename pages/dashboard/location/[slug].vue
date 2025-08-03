@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+const route = useRoute();
 const locationStore = useLocationStore();
 const {
   currentLocation: location,
@@ -9,6 +10,12 @@ const {
 onMounted(() => {
   locationStore.refreshCurrentLocation();
 });
+
+onBeforeRouteUpdate((to) => {
+  if (to.name === "dashboard-location-slug") {
+    locationStore.refreshCurrentLocation();
+  }
+});
 </script>
 
 <template>
@@ -17,7 +24,13 @@ onMounted(() => {
       <div class="loading" />
     </div>
 
-    <div v-else-if="location">
+    <div v-else-if="error" class="alert alert-error">
+      <h2 class="text-lg">
+        {{ error.statusMessage }}
+      </h2>
+    </div>
+
+    <div v-else-if="route.name === 'dashboard-location-slug' && location">
       <h2 class="text-xl">
         {{ location.name }}
       </h2>
@@ -35,10 +48,8 @@ onMounted(() => {
       </button>
     </div>
 
-    <div v-else-if="error" class="alert alert-error">
-      <h2 class="text-lg">
-        {{ error.statusMessage }}
-      </h2>
+    <div v-else>
+      <NuxtPage />
     </div>
   </div>
 </template>
