@@ -16,7 +16,7 @@ const isInCurrentLocationPage = computed(() => CURRENT_LOCATION_PAGES.has(route.
 
 const isInEditPage = computed(() => EDIT_PAGES.has(route.name?.toString() || ""));
 
-const isLoadingCurrentLocation = computed(() => currentLocationStatus.value === "pending" || !currentLocation.value);
+const isLoadingCurrentLocation = computed(() => currentLocationStatus.value === "pending");
 
 const hasSidebarItems = computed(() => {
   return sidebarStore.sidebarItems.length > 0;
@@ -76,37 +76,41 @@ effect(() => {
       label: "Back to Locations",
       href: "/dashboard",
       icon: "tabler:arrow-left",
-    }, {
-      id: "link-dashboard",
-      label: isLoadingCurrentLocation.value ? "Loading..." : currentLocation.value!.name,
-      to: {
-        name: "dashboard-location-slug",
-        params: {
-          slug: route.params.slug,
-        },
-      },
-      icon: "tabler:map",
-    }, {
-      id: "link-location-edit",
-      label: "Edit Location",
-      to: {
-        name: "dashboard-location-slug-edit",
-        params: {
-          slug: route.params.slug,
-        },
-      },
-      icon: "tabler:map-pin-cog",
-    }, {
-      id: "link-location-add",
-      label: "Add Location Log",
-      to: {
-        name: "dashboard-location-slug-add",
-        params: {
-          slug: route.params.slug,
-        },
-      },
-      icon: "tabler:circle-plus-filled",
     }];
+
+    if (currentLocation.value && currentLocationStatus.value !== "pending") {
+      sidebarStore.sidebarTopItems.push({
+        id: "link-dashboard",
+        label: currentLocation.value.name,
+        to: {
+          name: "dashboard-location-slug",
+          params: {
+            slug: route.params.slug,
+          },
+        },
+        icon: "tabler:map",
+      }, {
+        id: "link-location-edit",
+        label: "Edit Location",
+        to: {
+          name: "dashboard-location-slug-edit",
+          params: {
+            slug: route.params.slug,
+          },
+        },
+        icon: "tabler:map-pin-cog",
+      }, {
+        id: "link-location-add",
+        label: "Add Location Log",
+        to: {
+          name: "dashboard-location-slug-add",
+          params: {
+            slug: route.params.slug,
+          },
+        },
+        icon: "tabler:circle-plus-filled",
+      });
+    }
   }
 });
 </script>
@@ -141,6 +145,10 @@ effect(() => {
           :href="item.href"
           :to="item.to"
         />
+
+        <div v-if="route.path.startsWith('/dashboard/location') && isLoadingCurrentLocation" class="flex items-center justify-center">
+          <div class="loading" />
+        </div>
 
         <div v-if="showSidebarItemsDivider" class="divider" />
         <div v-if="isLoadingSidebarItems" class="px-4">
